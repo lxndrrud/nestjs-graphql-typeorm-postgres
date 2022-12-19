@@ -1,0 +1,44 @@
+version: '3'
+services:
+
+  pg-products:
+    container_name: pg-products
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: products
+    networks: 
+      - micronetwork
+    ports:
+      - 10932:5432
+
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - pg-products
+    networks: 
+      - micronetwork
+
+  products-service:
+    build: 
+      context: ./products-service
+      dockerfile: Dockerfile.dev
+    container_name: products-service
+    depends_on:
+      - pg-products
+    volumes:
+      - ./products-service:/usr/src/products-service
+    ports:
+      - 10832:10832
+    networks: 
+      - micronetwork
+
+networks:
+  micronetwork:
+    external: False
